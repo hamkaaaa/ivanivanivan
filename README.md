@@ -25,6 +25,23 @@ RESTful API backend dibangun menggunakan **Node.js**, **Express.js**, dan **Supa
 - `PUT /api/products/:id` - Update produk
 - `DELETE /api/products/:id` - Hapus produk
 
+### 4. Transactions (`/api/transactions`)
+- `POST /api/transactions` - Buat transaksi baru (otomatis memotong stok produk)
+  - **Body Example:**
+    ```json
+    {
+      "customer_id": "uuid-customer",
+      "items": [
+        {
+          "product_id": "uuid-product",
+          "quantity": 2
+        }
+      ]
+    }
+    ```
+- `GET /api/transactions` - Ambil histori semua transaksi (lengkap dengan data customer & item produk)
+- `GET /api/transactions/:id` - Ambil detail 1 transaksi berdasarkan ID
+
 ## Panduan Penyiapan
 
 1. Jalankan `npm install` di terminal.
@@ -52,6 +69,21 @@ create table products (
   category_id uuid references categories(id),
   price numeric(12,2) default 0,
   stock integer default 0
+);
+
+create table transactions (
+  id uuid primary key default gen_random_uuid(),
+  customer_id uuid references customers(id) on delete cascade,
+  total_price numeric(12,2) not null,
+  created_at timestamptz default now()
+);
+
+create table transaction_items (
+  id uuid primary key default gen_random_uuid(),
+  transaction_id uuid references transactions(id) on delete cascade,
+  product_id uuid references products(id) on delete restrict,
+  quantity integer not null,
+  price numeric(12,2) not null
 );
 ```
 
