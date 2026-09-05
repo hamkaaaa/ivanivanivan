@@ -3,7 +3,11 @@ import { ProductModel } from "../models/productModel.js";
 export const ProductController = {
   async getAll(req, res) {
     try {
-      const { category_id } = req.query;
+      let category_id = req.query.category_id;
+      if (!category_id && req.url && req.url.includes("?")) {
+        const queryParams = new URLSearchParams(req.url.split("?")[1]);
+        category_id = queryParams.get("category_id");
+      }
       const products = await ProductModel.getAll(category_id);
       res.json(products);
     } catch (err) {
